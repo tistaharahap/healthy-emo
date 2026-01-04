@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     username: user.username
   });
 
-  const response = NextResponse.redirect(new URL("/entries", request.url));
+  const response = NextResponse.redirect(new URL("/entries", request.url), 303);
   response.cookies.set(getAuthCookieName(), token, getAuthCookieOptions());
   return response;
 }
