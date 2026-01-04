@@ -1,12 +1,26 @@
 {
   "name": "healthy-emo",
-  "module": "index.ts",
-  "type": "module",
   "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "peerDependencies": {
-    "typescript": "^5"
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.606.0",
+    "@aws-sdk/s3-request-presigner": "^3.606.0",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.6.3",
+    "mongoose": "^8.6.0",
+    "next": "16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "typescript": "^5.5.4"
   }
 }
