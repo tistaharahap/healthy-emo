@@ -10,9 +10,12 @@ if (!S3_BUCKET || !S3_ENDPOINT) {
   throw new Error("S3_BUCKET or S3_ENDPOINT is not set");
 }
 
+const s3Bucket = S3_BUCKET!;
+const s3Endpoint = S3_ENDPOINT!;
+
 const s3Client = new S3Client({
   region: S3_REGION,
-  endpoint: S3_ENDPOINT,
+  endpoint: s3Endpoint,
   forcePathStyle: process.env.S3_FORCE_PATH_STYLE !== "false",
   credentials: {
     accessKeyId: process.env.S3_ACCESS_KEY_ID ?? "",
@@ -24,11 +27,11 @@ function normalizePublicBase(base: string) {
   const trimmed = base.replace(/\/$/, "");
   try {
     const baseUrl = new URL(trimmed);
-    const endpointUrl = new URL(S3_ENDPOINT);
+    const endpointUrl = new URL(s3Endpoint);
     const isSameHost = baseUrl.host === endpointUrl.host;
     const isRootPath = baseUrl.pathname === "" || baseUrl.pathname === "/";
     if (isSameHost && isRootPath) {
-      return `${trimmed}/${S3_BUCKET}`;
+      return `${trimmed}/${s3Bucket}`;
     }
   } catch {
     // Fall through with trimmed base.
@@ -39,7 +42,7 @@ function normalizePublicBase(base: string) {
 function buildPublicUrl(key: string) {
   const base =
     process.env.S3_PUBLIC_BASE_URL ??
-    `${S3_ENDPOINT.replace(/\/$/, "")}/${S3_BUCKET}`;
+    `${s3Endpoint.replace(/\/$/, "")}/${s3Bucket}`;
   const normalizedBase = normalizePublicBase(base);
   return `${normalizedBase.replace(/\/$/, "")}/${key.replace(/^\//, "")}`;
 }
@@ -59,7 +62,7 @@ export async function createPresignedUpload({
   const key = `${userId}/${randomUUID()}${extension ? `.${extension}` : ""}`;
 
   const command = new PutObjectCommand({
-    Bucket: S3_BUCKET,
+    Bucket: s3Bucket,
     Key: key,
     ContentType: contentType
   });

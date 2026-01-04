@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectToDatabase } from "@/lib/db";
 import { User } from "@/models/User";
+import type { UserDocument } from "@/models/User";
+import type { Types } from "mongoose";
 import {
   createSessionToken,
   getAuthCookieName,
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
 
   const user = await User.findOne({
     usernameLower: username.toLowerCase()
-  }).lean();
+  }).lean<UserDocument & { _id: Types.ObjectId }>();
   if (!user) {
     if (isForm) {
       return NextResponse.redirect(new URL("/login?error=invalid", request.url));

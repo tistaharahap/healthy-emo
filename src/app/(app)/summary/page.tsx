@@ -3,6 +3,8 @@ import { connectToDatabase } from "@/lib/db";
 import { Entry } from "@/models/Entry";
 import Nav from "@/components/Nav";
 import { groupEntriesByMonth } from "@/lib/summary";
+import type { Types } from "mongoose";
+import type { EntryDocument } from "@/models/Entry";
 
 export default async function SummaryPage() {
   const session = await requireUser();
@@ -10,7 +12,7 @@ export default async function SummaryPage() {
 
   const entries = await Entry.find({ userId: session.userId })
     .sort({ date: -1 })
-    .lean();
+    .lean<(EntryDocument & { _id: Types.ObjectId })[]>();
 
   const mappedEntries = entries.map((entry) => ({
     _id: entry._id.toString(),
@@ -18,7 +20,7 @@ export default async function SummaryPage() {
     feelingLabel: entry.feelingLabel,
     feelingScore: entry.feelingScore,
     reason: entry.reason,
-    imageUrl: entry.imageUrl ?? null
+    imageUrl: entry.imageUrl ?? undefined
   }));
 
   const grouped = groupEntriesByMonth(mappedEntries);

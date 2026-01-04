@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import type { Types } from "mongoose";
 import { requireUser } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { Entry } from "@/models/Entry";
+import type { EntryDocument } from "@/models/Entry";
 import { FEELINGS } from "@/lib/feelings";
 import { JOURNAL_TIMEZONE } from "@/lib/dates";
 import EntryForm from "@/components/EntryForm";
@@ -31,7 +33,7 @@ export default async function EditEntryPage({
   const entry = await Entry.findOne({
     _id: params.id,
     userId: session.userId
-  }).lean();
+  }).lean<EntryDocument & { _id: Types.ObjectId }>();
 
   if (!entry) {
     redirect("/entries");

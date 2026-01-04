@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectToDatabase } from "@/lib/db";
 import { User } from "@/models/User";
+import type { UserDocument } from "@/models/User";
+import type { Types } from "mongoose";
 import {
   createSessionToken,
   getAuthCookieName,
@@ -38,7 +40,9 @@ export async function POST(request: Request) {
   }
 
   const usernameLower = username.toLowerCase();
-  const existing = await User.findOne({ usernameLower }).lean();
+  const existing = await User.findOne({ usernameLower }).lean<
+    UserDocument & { _id: Types.ObjectId }
+  >();
   if (existing) {
     if (isForm) {
       return NextResponse.redirect(

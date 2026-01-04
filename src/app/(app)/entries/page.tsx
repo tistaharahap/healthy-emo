@@ -5,6 +5,8 @@ import Nav from "@/components/Nav";
 import EntryCard from "@/components/EntryCard";
 import { groupEntriesByMonth } from "@/lib/summary";
 import { JOURNAL_TIMEZONE } from "@/lib/dates";
+import type { Types } from "mongoose";
+import type { EntryDocument } from "@/models/Entry";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: JOURNAL_TIMEZONE,
@@ -19,7 +21,7 @@ export default async function EntriesPage() {
 
   const entries = await Entry.find({ userId: session.userId })
     .sort({ date: -1 })
-    .lean();
+    .lean<(EntryDocument & { _id: Types.ObjectId })[]>();
 
   const mappedEntries = entries.map((entry) => ({
     _id: entry._id.toString(),
@@ -27,7 +29,7 @@ export default async function EntriesPage() {
     feelingLabel: entry.feelingLabel,
     feelingScore: entry.feelingScore,
     reason: entry.reason,
-    imageUrl: entry.imageUrl ?? null
+    imageUrl: entry.imageUrl ?? undefined
   }));
 
   const grouped = groupEntriesByMonth(mappedEntries);
