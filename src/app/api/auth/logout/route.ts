@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { getAuthCookieName, getAuthCookieOptions } from "@/lib/auth";
+import { getRequestOrigin } from "@/lib/redirect";
 
 export async function POST(request: Request) {
-  const response = NextResponse.redirect(new URL("/login", request.url), 303);
+  const origin = await getRequestOrigin(request);
+  const response = NextResponse.redirect(new URL("/login", origin), 303);
   response.cookies.delete({
     name: getAuthCookieName(),
     path: getAuthCookieOptions().path

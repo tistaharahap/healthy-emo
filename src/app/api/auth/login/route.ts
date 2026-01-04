@@ -9,6 +9,7 @@ import {
   getAuthCookieName,
   getAuthCookieOptions
 } from "@/lib/auth";
+import { getRequestOrigin } from "@/lib/redirect";
 
 async function parseBody(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
@@ -30,11 +31,11 @@ export async function POST(request: Request) {
   const isForm =
     !(request.headers.get("content-type") ?? "").includes("application/json");
 
+  const origin = await getRequestOrigin(request);
+
   if (!username || !password) {
     if (isForm) {
-      return NextResponse.redirect(
-        new URL("/login?error=missing", request.url)
-      );
+      return NextResponse.redirect(new URL("/login?error=missing", origin), 303);
     }
     return NextResponse.json({ error: "Missing username or password." }, { status: 400 });
   }
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
   }).lean<UserDocument & { _id: Types.ObjectId }>();
   if (!user) {
     if (isForm) {
-      return NextResponse.redirect(new URL("/login?error=invalid", request.url));
+      return NextResponse.redirect(new URL("/login?error=invalid", origin), 303);
     }
     return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
   }
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
   const matches = await bcrypt.compare(password, user.passwordHash);
   if (!matches) {
     if (isForm) {
-      return NextResponse.redirect(new URL("/login?error=invalid", request.url));
+      return NextResponse.redirect(new URL("/login?error=invalid", origin), 303);
     }
     return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
   }
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
     username: user.username
   });
 
-  const response = NextResponse.redirect(new URL("/entries", request.url), 303);
+  const response = NextResponse.redirect(new URL("/entries", origin), 303);
   response.cookies.set(getAuthCookieName(), token, getAuthCookieOptions());
   return response;
 }

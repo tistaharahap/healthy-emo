@@ -9,6 +9,7 @@ import {
   getAuthCookieName,
   getAuthCookieOptions
 } from "@/lib/auth";
+import { getRequestOrigin } from "@/lib/redirect";
 
 async function parseBody(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
@@ -30,10 +31,13 @@ export async function POST(request: Request) {
   const isForm =
     !(request.headers.get("content-type") ?? "").includes("application/json");
 
+  const origin = await getRequestOrigin(request);
+
   if (!username || !password) {
     if (isForm) {
       return NextResponse.redirect(
-        new URL("/register?error=missing", request.url)
+        new URL("/register?error=missing", origin),
+        303
       );
     }
     return NextResponse.json({ error: "Missing username or password." }, { status: 400 });
@@ -46,7 +50,8 @@ export async function POST(request: Request) {
   if (existing) {
     if (isForm) {
       return NextResponse.redirect(
-        new URL("/register?error=exists", request.url)
+        new URL("/register?error=exists", origin),
+        303
       );
     }
     return NextResponse.json({ error: "Username already taken." }, { status: 409 });
@@ -60,7 +65,7 @@ export async function POST(request: Request) {
     username: user.username
   });
 
-  const response = NextResponse.redirect(new URL("/entries", request.url), 303);
+  const response = NextResponse.redirect(new URL("/entries", origin), 303);
   response.cookies.set(getAuthCookieName(), token, getAuthCookieOptions());
   return response;
 }
